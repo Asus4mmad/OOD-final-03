@@ -1,60 +1,53 @@
 package edu.ticket;
 
+import edu.ticket.state.*;
+import edu.ticket.strategy.ResponseStrategy;
+
 public class Ticket {
-    int id;
-    String status = "NEW";
-    String channel;
-    String type;
-    String request;
-    String response;
+    private int id;
+    private String type;
+    private String channel;
+    private TicketState state;
+    private ResponseStrategy responseStrategy;
 
-    public Ticket(int id,String channel, String type) {
+    public Ticket(int id, String type, String channel) {
         this.id = id;
-        this.channel = channel;
         this.type = type;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getChannel() {
-        return channel;
-    }
-
-    public void setChannel(String channel) {
         this.channel = channel;
+        this.state = new NewState();
+    }
+
+    public void setState(TicketState state) {
+        this.state = state;
+    }
+
+    public void setResponseStrategy(ResponseStrategy responseStrategy) {
+        this.responseStrategy = responseStrategy;
+    }
+
+    public void handle() {
+        state.handle(this);
+    }
+
+    public void respond() {
+        if (responseStrategy != null) {
+            responseStrategy.respond();
+        }
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getType() {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getChannel() {
+        return channel;
     }
 
-    public String getRequest() {
-        return request;
-    }
-
-    public void setRequest(String request) {
-        this.request = request;
-    }
-
-    public String getResponse() {
-        return response;
-    }
-
-    public void setResponse(String response) {
-        this.response = response;
-    }
-
-    public int getId() {
-        return this.id;
+    public String getState() {
+        return state.getStateName();
     }
 }
