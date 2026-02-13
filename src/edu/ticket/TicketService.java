@@ -1,55 +1,35 @@
 package edu.ticket;
 
+import edu.ticket.channel.ChannelHandler;
+import edu.ticket.channel.ChannelHandlerFactory;
+import edu.ticket.state.*;
+
 public class TicketService {
-
-
-    public void handle(Ticket ticket) {
-        String currentStatus = ticket.status;
-        String type = ticket.type;
-        String channel = ticket.channel;
-
-        if (currentStatus.equals("NEW")) {
-            System.out.println("Ticket created");
-
-            if (channel.equals("WEB")) {
-                System.out.println("Received from web");
-            } else if (channel.equals("EMAIL")) {
-                System.out.println("Received from email");
-            }
-
-            ticket.setStatus("ASSIGNED");
+    public void processTicket(Ticket ticket) {
+        // Handle channel
+        ChannelHandler channelHandler = ChannelHandlerFactory.getHandler(ticket.getChannel());
+        if (channelHandler != null) {
+            channelHandler.handle();
         }
 
-        if (currentStatus.equals("ASSIGNED")) {
-            if (type.equals("BUG")) {
-                System.out.println("Assigned to engineering");
-            } else {
-                System.out.println("Assigned to support");
-            }
-            ticket.setStatus("IN_PROGRESS");
-        }
-
-        if (currentStatus.equals("IN_PROGRESS")) {
-            System.out.println("Working on ticket");
-
-            if (type.equals("BUG")) {
-                System.out.println("Sending bug response");
-            } else {
-                System.out.println("Sending generic response");
-            }
-
-            ticket.setStatus("RESOLVED");
-        }
-
-        if (currentStatus.equals("RESOLVED")) {
-            System.out.println("Ticket resolved");
-            ticket.setStatus("CLOSED") ;
-        }
-
-        if (currentStatus.equals("CLOSED")) {
-            System.out.println("Ticket closed");
-        }
-
-        System.out.println("Logging ticket handling : " + ticket.getId() + " -> " + ticket.status);
+        // Process through states
+        ticket.handle(); // NEW
+        
+        String team = ticket.getType().equalsIgnoreCase("BUG") ? "engineering" : "support";
+        ticket.setState(new AssignedState(team));
+        ticket.handle(); // ASSIGNED
+        
+        ticket.setState(new InProgressState());
+        ticket.handle(); // IN_PROGRESS
+        
+        ticket.respond(); // Send response
+        
+        ticket.setState(new ResolvedState());
+        ticket.handle(); // RESOLVED
+        
+        ticket.setState(new ClosedState());
+        
+        // Log
+        System.out.println("Logging ticket handling : " + ticket.getId() + " -> " + ticket.getState());
     }
 }
