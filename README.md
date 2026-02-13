@@ -201,8 +201,8 @@ Logging ticket handling : 2 -> CLOSED
 
 ## اعضای گروه
 
-1. **mahdi1824** 
-2. **Asus4mmad**
+1. **mahdi1824** محمدمهدی عیوضی
+2. **Asus4mmad** محمد فاتح
 
 
 
